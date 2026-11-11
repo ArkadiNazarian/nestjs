@@ -1,4 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { CreaUserDTO } from './dto/create-user.dto.js';
+import { UpdateUserDto } from './dto/update-user.dto.js';
 
 @Injectable()
 export class UsersService {
@@ -41,17 +43,26 @@ export class UsersService {
 
     findAll(role?: 'INTERN' | 'ENGINEER' | 'ADMIN') {
         if (role) {
-            return this.users.filter((user) => user.role === role)
+            const users = this.users.filter((user) => user.role === role)
+
+            if (users.length === 0) throw new NotFoundException('User not found')
+
+            return users
         }
 
         return this.users
     }
 
-    findOne(id: string) {
-        return this.users.find(user => user.id === Number(id))
+    findOne(id: number) {
+        const user = this.users.find(user => user.id === id)
+
+        // NotFoundException is for /user/99 that we don't have a such user but if we retur it we get 200 status and empty body so NotFoundException is for this case
+        if (!user) throw new NotFoundException('User not found')
+
+        return user
     }
 
-    createUser(user: { name: string; email: string; role: 'INTERN' | 'ENGINEER' | 'ADMIN' }) {
+    createUser(user: CreaUserDTO) {
 
         const highestUserId = [...this.users].sort((a, b) => b.id - a.id)
 
@@ -66,9 +77,9 @@ export class UsersService {
 
     }
 
-    updateUser(id: string, updatedUser: { name?: string, email?: string, role?: 'INTERN' | 'ENGINEER' | 'ADMIN' }) {
+    updateUser(id: number, updatedUser: UpdateUserDto) {
         this.users = this.users.map(user => {
-            if (user.id === Number(id)) {
+            if (user.id === id) {
                 return { ...user, ...updatedUser }
             }
             return user
@@ -77,10 +88,10 @@ export class UsersService {
         return this.findOne(id)
     }
 
-    deleteUser(id: string) {
+    deleteUser(id: number) {
         const removedUser = this.findOne(id)
 
-        this.users = this.users.filter(user => user.id !== Number(id))
+        this.users = this.users.filter(user => user.id !== id)
 
         return removedUser
     }
