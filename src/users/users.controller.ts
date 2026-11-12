@@ -2,12 +2,15 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query,
 import { UsersService } from './users.service.js';
 import { CreaUserDTO } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
+import { SkipThrottle } from '@nestjs/throttler';
 
+@SkipThrottle() //is for skip throttler for this controller
 @Controller('users')   // /users route
 export class UsersController {
 
     constructor(private readonly usersService: UsersService) { }
 
+    @SkipThrottle({ default: false }) // doesn't skip the throttler from this request
     @Get() // /users or /user?role=Admin
     findAll(@Query('role') role?: 'INTERN' | 'ENGINEER' | 'ADMIN') {
         return this.usersService.findAll(role)
