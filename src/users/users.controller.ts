@@ -1,9 +1,11 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UsePipes, ValidationPipe } from '@nestjs/common';
 import { UsersService } from './users.service.js';
 import { CreaUserDTO } from './dto/create-user.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
 import { SkipThrottle } from '@nestjs/throttler';
 
+// @UsePipes(ValidationPipe, ParseIntPipe)   we can also use this approach for each controller so we can remove from the routes also we have
+// @UseGuard and @UseInterceptors . All of these can use on top the each route handler also , but for pipes we can use the params approach also
 @SkipThrottle() //is for skip throttler for this controller
 @Controller('users')   // /users route
 export class UsersController {

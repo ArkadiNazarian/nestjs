@@ -6,16 +6,32 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { MyLoggerModule } from './my-logger/my-logger.module.js';
 import { LoggerMiddleware } from './common/middleware/logger.middleware.js';
+import { AuthModule } from './auth/auth.module.js';
+import { MongooseModule } from '@nestjs/mongoose';
+import { ConfigModule } from '@nestjs/config';
 
 
 // ThrottlerModule is for rate limiting
 @Module({
-  imports: [UsersModule,
+  imports: [
+    // this is for .env
+    ConfigModule.forRoot(),
+    // if we change the order of MongooseModule.forRoot(process.env.MONGODB_URL!) and ConfigModule.forRoot() because the config is defined
+    // after the using the .envs we get error , to fix this error we should use this:
+    // 
+    // MongooseModule.forRootAsync({
+    //   useFactory: () => ({
+    //     uri: process.env.MONGODB_URL,
+    //   }),
+    // }),
+    MongooseModule.forRoot(process.env.MONGODB_URL!),
+    UsersModule,
     ThrottlerModule.forRoot([{
       ttl: 60000,
-      limit: 3
+      limit: 30
     }]),
-    MyLoggerModule
+    MyLoggerModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService, {
